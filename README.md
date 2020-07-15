@@ -1,3 +1,3 @@
 # Mini Grep
 
-A CLI tool for pattern matching files usinf REGEXP.
+A CLI tool for pattern matching files using REGEXP.
