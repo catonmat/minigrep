@@ -1,9 +1,13 @@
 use std::env;
 use std::fs;
+use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let config = Config::new(&args);
+    let config = Config::new(&args).unwrap_or_else(|err_msg| {
+        println!("Error: {}", err_msg);
+        process::exit(1);
+    });
 
     println!("searching for: {} in: {}...", config.query, config.filename);
 
@@ -18,15 +22,16 @@ struct Config {
 }
 
 impl Config {
-    fn new(args: &[String]) -> Config {
+    fn new(args: &[String]) -> Result<Config, &'static str> {
         // &args[0] = /path/to/rust/binary/main.rs
         if args.len() < 3 {
-            panic!("Please enter the search term as the first argument and /path/to/filename as second argument.")
+            // panic!("Please enter the search term as the first argument and /path/to/filename as second argument.");
+            return Err("Please enter the search term as the first argument and /path/to/filename as second argument.");
         }
 
         let query = args[1].clone();
         let filename = args[2].clone();
     
-        Config { query, filename }
+        Ok(Config { query, filename })
     }
 }
