@@ -20,6 +20,10 @@ struct Config {
 impl Config {
     fn new(args: &[String]) -> Config {
         // &args[0] = /path/to/rust/binary/main.rs
+        if args.len() < 3 {
+            panic!("Please enter the search term as the first argument and /path/to/filename as second argument.")
+        }
+
         let query = args[1].clone();
         let filename = args[2].clone();
     
