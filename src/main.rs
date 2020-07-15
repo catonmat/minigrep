@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::process;
+use std::error::Error;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -11,9 +12,10 @@ fn main() {
 
     println!("searching for: {} in: {}...", config.query, config.filename);
 
-    let contents = fs::read_to_string(config.filename).expect("Something went wrong reading the file.");
-
-    println!("Text is:\n{}", contents);
+    if let Err(e) = run(config) {
+        println!("Application error: {}", e);
+        process::exit(1);
+    }
 }
 
 struct Config {
@@ -34,4 +36,14 @@ impl Config {
     
         Ok(Config { query, filename })
     }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    // `Box<dyn Error>` means the function will return a type that implements the trait `Error`
+    let contents = fs::read_to_string(config.filename)?;
+
+    println!("Text is:\n{}", contents);
+
+    // Using `unit- value ()` is stylistically stating `run()` is executed purely for side-effects and not for a return value.
+    Ok(()) 
 }
