@@ -25,7 +25,16 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // `Box<dyn Error>` means the function will return a type that implements the trait `Error`
     let contents = fs::read_to_string(config.filename)?;
 
-    println!("Text is:\n{}", contents);
+    let mut results: u8 = 0;
+
+    for line in search(&config.query, &contents) {
+        println!("{}", line);
+        results += 1;
+    }
+
+    if results == 0 {
+        println!("No results found.");
+    }
 
     // Using `unit- value ()` is stylistically stating `run()` is executed purely for side-effects and not for a return value.
     Ok(()) 
