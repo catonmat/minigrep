@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::fs;
+use std::env;
 
 pub struct Config {
     pub query: String,
     pub filename: String,
+    pub case_sensitive: bool,
 }
 
 impl Config {
@@ -16,8 +18,13 @@ impl Config {
 
         let query = args[1].clone();
         let filename = args[2].clone();
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
     
-        Ok(Config { query, filename })
+        Ok(Config { 
+            query,
+            filename,
+            case_sensitive
+        })
     }
 }
 
@@ -25,14 +32,19 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // `Box<dyn Error>` means the function will return a type that implements the trait `Error`
     let contents = fs::read_to_string(config.filename)?;
 
-    let mut results: u8 = 0;
+    let results = if config.case_sensitive {
+        search(&config.query, &contents)
+    } else {
+        search_case_insensitive(&config.query, &contents)
+    };
 
-    for line in search(&config.query, &contents) {
+    let mut matches: u8 = 0;
+    for line in results {
         println!("{}", line);
-        results += 1;
+        matches += 1;
     }
 
-    if results == 0 {
+    if matches == 0 {
         println!("No results found.");
     }
 
