@@ -9,15 +9,19 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
         // &args[0] = /path/to/rust/binary/main.rs
-        if args.len() < 3 {
-            // panic!("Please enter the search term as the first argument and /path/to/filename as second argument.");
-            return Err("Please enter the search term as the first argument and /path/to/filename as second argument.");
-        }
+        args.next(); // we skip the pathname and go to query value.alloc
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+        let query = match args.next() {
+          Some(arg) => arg,
+          None => return Err("Didn't receive a query string."),
+        };
+        let filename = match args.next() {
+          Some(arg) => arg,
+          None => return Err("Did not receive a filename."),
+        };
+
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
     
         Ok(Config { 
@@ -54,15 +58,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     // `'a` states the return value of the function will have identicla lifetime to `contents`
-    let mut results = Vec::new();
-    
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-
-    results
+    contents
+      .lines()
+      .filter(|line| line.contains(query))
+      .collect()
 }
 
 fn search_case_insensitive<'a>(
